@@ -1,0 +1,130 @@
+#!/bin/bash
+case $1 in 
+	1) echo "你选择了安装指定版本"
+#local中保存当前可用版本
+cd /home/observer/桌面/nginx_install
+/usr/local/nginx/sbin/nginx -v &> local
+echo `cat local | grep -o [0-9][0-9].[0-9]` > local
+
+insall_web="http://nginx.org/download/nginx-$2.tar.gz"
+path="/home/observer/桌面"
+install_path="/usr/local"
+echo 安装gcc g++依赖库
+apt-get install build-essential
+apt-get install libtool
+
+echo 安装pcre依赖库............
+apt-get update
+apt-get install libpcre3 libpcre3-dev
+
+echo 安装zlib依赖库............
+
+
+
+apt-get update
+apt-get install libpcre3 libpcre3-dev
+
+
+
+
+echo 安装ssl依赖库..............
+apt-get install openssl
+echo -------------------------------------------------------------------------
+echo 安装ssl依赖库..............
+apt-get install openssl
+echo -------------------------------------------------------------------------
+echo 开始安装nginx版本$2
+
+wget -P $path http://nginx.org/download/nginx-$2.tar.gz
+cd $path
+echo ---------------------------------------------------------------------------
+
+echo 开始解压
+tar zxvf nginx-$2.tar.gz
+cd $path/nginx-$2
+./configure
+make
+make install
+./back
+	;;
+
+
+
+
+
+
+
+
+	2)echo "你选择了更新至最新版本"
+cd /home/observer/桌面/nginx_install
+#获取本地nginx版本号并存储至b.txt
+/usr/local/nginx/sbin/nginx -v &> b.txt
+#local中保存当前版本信息
+echo `cat b.txt | grep -o [0-9][0-9].[0-9]` > local
+echo `cat b.txt | grep -o [0-9][0-9].[0-9]` > b.txt
+#获取官网html
+wget https://nginx.org/en/download.html
+cat download.html | grep -o nginx-1.[0-9]..[0-9] > a.txt
+echo `sed -n '1p' a.txt` > a.txt
+echo `cat a.txt | grep -o [0-9][0-9].[0-9]` > a.txt
+#a.txt中保存官网最新版本
+a=`cat a.txt`
+b=`cat b.txt`
+if [ `expr $a \> $b` -eq 1 ]
+then
+insall_web="http://nginx.org/download/nginx-1.$a.tar.gz"
+path="/home/observer/桌面"
+install_path="/usr/local"
+echo 安装gcc g++依赖库
+apt-get install build-essential
+apt-get install libtool
+
+echo 安装pcre依赖库............
+apt-get update
+apt-get install libpcre3 libpcre3-dev
+
+echo 安装zlib依赖库............
+
+
+
+apt-get update
+apt-get install libpcre3 libpcre3-dev
+
+echo 安装ssl依赖库..............
+apt-get install openssl
+echo  -------------------------------------------------------------------------
+echo 开始安装nginx版本$a
+
+wget -P $path http://nginx.org/download/nginx-1.$a.tar.gz
+cd $path
+echo ---------------------------------------------------------------------------
+
+echo 开始解压
+tar zxvf nginx-1.$a.tar.gz
+cd $path/nginx-1.$a
+./configure
+make
+make install
+cd /home/observer/桌面/nginx_install
+rm download.html
+cd $path
+rm nginx-1.$a.tar.gz
+rm -r nginx-1.$a
+cd /home/observer/桌面/nginx_install
+./back
+
+
+else
+echo "当前版本已经是最新版本"
+cd /home/observer/桌面/nginx_install
+rm download.html
+fi
+
+	;;
+	*)echo "请在参数1号位输入正确的数字（1或2）"
+	;;
+esac	
+
+
+
+
