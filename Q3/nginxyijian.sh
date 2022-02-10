@@ -126,6 +126,7 @@ if [ -n $argu ]; then
 		./configure $argu
 		make&&make install
 		echo "Finish"
+	fi
 else
 	inst
-
+fi
