@@ -3,11 +3,10 @@ import re
 import os
 
 if(os.system("id -u") !="0"):
-    print( "Error: You must be root to run this script, please use root to install lnmp")
+    print( "Error: You must be root to run this script")
     exit()
 
 def update():
-    if 
     latest=str(re.search(r"nginx-\d.\d{1,2}.\d{1,2}",str(htmlstr.text)).group())
     print("Latest version is "+latest+".")
     select=str(input("Do you want to continue?(y/n)"))
