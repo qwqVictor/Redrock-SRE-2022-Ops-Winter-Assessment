@@ -1,0 +1,6 @@
+[Unit]
+Description=Joshua_DDNS
+Requires=network.target
+[Service]
+WorkingDirectory = /etc/joshua_ddns
+ExecStart=

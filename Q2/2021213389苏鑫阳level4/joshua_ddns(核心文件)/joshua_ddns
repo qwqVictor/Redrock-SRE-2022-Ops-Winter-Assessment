@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+import logging
+
+from tools import spec
+import Option
+import Manager
+import sys
+
+if __name__ == "__main__":
+    file_handler = logging.FileHandler('joshua_ddns.log', mode='a', encoding="utf8")
+    file_handler.setFormatter(logging.Formatter(
+        '%(asctime)s [%(levelname)s] %(module)s.%(lineno)d %(name)s:\t%(message)s'
+    ))
+    file_handler.setLevel(logging.DEBUG)
+
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(logging.Formatter(
+        '[%(asctime)s %(levelname)s] %(message)s',
+        datefmt="%Y/%m/%d %H:%M:%S"
+    ))
+    console_handler.setLevel(logging.ERROR)
+
+    logging.basicConfig(
+        level=0,
+        handlers=[file_handler, console_handler],
+    )
+
+    mparser = spec.Parser()
+    moption = Option.OptionManager(**mparser.parse_args_dict()).get_option()
+    Manager.Manager(moption)
+
+
+
+
+
