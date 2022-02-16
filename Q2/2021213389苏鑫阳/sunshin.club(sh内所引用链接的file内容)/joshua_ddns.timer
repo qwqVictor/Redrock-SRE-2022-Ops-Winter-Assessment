@@ -1,8 +1,0 @@
-[Unit]
-Description=Joshua_DDNS
-
-[Timer]
-OnUnitActiveSec=1h 
-
-[Install]
-WantedBy=multi-user.target

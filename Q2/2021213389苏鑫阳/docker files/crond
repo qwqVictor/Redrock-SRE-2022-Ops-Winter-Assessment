@@ -1,2 +1,0 @@
-* */1 * * * joshua_ddns -c /usr/local/joshua_ddns/ddns.conf >> /var/log/cron.log 2>&1
- 

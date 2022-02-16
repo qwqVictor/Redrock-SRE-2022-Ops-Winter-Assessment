@@ -1,7 +1,0 @@
-version: '2'
-services:
-        joshua_ddns:
-                image: joshua_ddns:1.0
-                privileged: true
-                stdin_open: true # -i interactive
-                tty: true # -t tty       
