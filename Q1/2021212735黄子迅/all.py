@@ -15,8 +15,8 @@ def environment_settle():
     (db,cursor)=database_connecter('super_root')
     try:
         if id_creator('super_root','translate')=='1':
-            cursor.execute('insert into translate (user_name) values(\'root\')')#默认用户名
-            cursor.execute('insert into info (password) values(\'1029384756lxt\')')#默认密码
+            cursor.execute('insert into translate (user_name) values(\'root\')')
+            cursor.execute('insert into info (password) values(\'1029384756lxt\')')
             db.commit()
         default_server_adder('root','server_list')
         default_server_adder('guest','server_list')
@@ -30,7 +30,7 @@ def environment_settle():
 def default_server_adder(base,tablename):
     try:
         (db,cursor)=database_connecter(base)
-        if id_creator(base,tablename)=='1':#默认列表
+        if id_creator(base,tablename)=='1':
             cursor.execute('insert into server_list (server_name,server_location) values(\'server_1\',\'root@172.18.0.3\')')
             cursor.execute('insert into server_list (server_name,server_location) values(\'server_2\',\'root@172.18.0.2\')')
             cursor.execute('insert into server_list (server_name,server_location) values(\'server_3\',\'root@172.18.0.4\')')
@@ -662,13 +662,11 @@ def UserGate(base,user_id,userinput):
             result = command_exec(commandin, user_id,base)
             if result=='exit!!!':
                 print('该命令不支持，请手动退出ssh\n')
-                history_writter(base,user_id,'执行失败')
-            elif result=='该界面不支持ssh指令' or result=='超出权限' or result=='请不要输入多余的空格' or result=='参数设定出现问题导致无法正常运行':
+            elif result=='该界面不支持ssh指令':
                 print('请使用前面提供的方法连接服务器\n')
-                history_writter(base,user_id,'执行失败')
             else:
                 print('\n',end='')
-                history_writter(base,user_id,'执行成功')
+                history_writter(base,user_id,result)
 
 
 def command_exec(command, user_id,base):

@@ -2,7 +2,7 @@ version: '2.2'
 services:
   
   maincomputer1:
-    image: 3820c
+    image: 4c3
     environment:
       MYSQL_PASSWORD: 1029384756lxt
       MYSQL_USER: computer1
@@ -12,7 +12,7 @@ services:
     volumes:
       - /docker-content/server1:/var/lib/mysql
   maincomputer2:
-    image: 3820c
+    image: 4c3
     environment:
       MYSQL_PASSWORD: 1029384756lxt
       MYSQL_USER: computer2
