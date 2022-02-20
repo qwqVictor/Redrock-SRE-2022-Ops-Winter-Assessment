@@ -663,7 +663,7 @@ def UserGate(base,user_id,userinput):
             if result=='exit!!!':
                 print('该命令不支持，请手动退出ssh\n')
                 history_writter(base,user_id,'执行失败')
-            elif result=='该界面不支持ssh指令':
+            elif result=='该界面不支持ssh指令' or result=='超出权限' or result=='请不要输入多余的空格' or result=='参数设定出现问题导致无法正常运行':
                 print('请使用前面提供的方法连接服务器\n')
                 history_writter(base,user_id,'执行失败')
             else:
@@ -704,7 +704,7 @@ def command_exec(command, user_id,base):
                 com_property=data[3]#参数字典
                 try:
                     if str(com_property)=='0':
-                        out=(os.popen(command).read())
+                        out=(os.popen(command).readlines())
                         print(str(out))
                         return str(out)
                     else:
