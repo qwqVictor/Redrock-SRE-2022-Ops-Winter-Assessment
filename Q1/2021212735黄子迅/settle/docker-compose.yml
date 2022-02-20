@@ -1,0 +1,23 @@
+version: '2.2'
+services:
+  
+  maincomputer1:
+    image: 3820c
+    environment:
+      MYSQL_PASSWORD: 1029384756lxt
+      MYSQL_USER: computer1
+      MYSQL_ROOT_PASSWORD: 1029384756lxt
+      MYSQL_DATABASE: service1
+    restart: always
+    volumes:
+      - /docker-content/server1:/var/lib/mysql
+  maincomputer2:
+    image: 3820c
+    environment:
+      MYSQL_PASSWORD: 1029384756lxt
+      MYSQL_USER: computer2
+      MYSQL_ROOT_PASSWORD: 1029384756lxt
+      MYSQL_DATABASE: service2
+    restart: always
+    volumes:
+      - /docker-content/server2:/var/lib/mysql
