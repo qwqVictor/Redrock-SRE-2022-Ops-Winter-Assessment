@@ -1,6 +1,6 @@
 默认服务器列表和ip于all.py的default_server_adder中更改
 默认超级管理用户名和密码于all.py的environment_settle中更改
 请在运行docker build前用电脑上生成的公钥改名为id_rsa.pub后替换本文件夹内的id_rsa.pub文件
-容器生成后运行/Document/run.py完成最后的配置
+容器生成后运行/Document/run.sh完成最后的配置
 完成后可ssh进入本跳板机体验功能
 ftp功能支持，默认开放用户为root
