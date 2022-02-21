@@ -41,6 +41,9 @@ cd $path/nginx-1.$a || exit
 ./configure
 make
 make install
+cd $path
+rm -r nginx-1.$a
+rm nginx-1.$a.tar.gz
 else
 echo "当前版本运行正常"
 
