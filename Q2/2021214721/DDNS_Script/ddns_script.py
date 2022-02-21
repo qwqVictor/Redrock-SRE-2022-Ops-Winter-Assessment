@@ -11,71 +11,264 @@ Author: zhangxinhui02
 访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721/ 查看完整项目。
 """
 
-# todo: 1.自动更新 2.部署安装脚本（包括各种依赖库） 3.多种获取IP的方法 4.IPv6 5.不用SDK自己实现 6.参数调用
-
+# todo: 1.自动更新 2.部署安装脚本（包括各种依赖库） 3.多种获取IP的方法done 4.IPv6
+#  5.不用SDK自己实现 6.参数调用 7.加密 8.网卡修改后可能会不匹配
+import os
 import sys
 import time
-import urllib
 import yaml
 from typing import List
-
 from Tea.exceptions import TeaException
-
 from aliyun_dns_manager import DnsClient
 
 # DDNS脚本配置文件的默认路径，可以进行修改。
 config_path = './config.yaml'
+# DDNS脚本配置文件的说明信息
+config_description = '# 这是DDNS脚本的配置文件。手动配置此文件可以跳过脚本的初始化。\n' \
+                     '# 访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/' \
+                     '2021214721/ 以查看项目。\n\n' \
+                     '# 以cache开头的值无需配置。\n' \
+                     '# 以user开头的值必需配置。\n' \
+                     '# 其他值可以保持默认。\n\n'
 # 脚本的默认设置及本地缓存的文件结构，如需改动请直接修改配置文件，不要修改代码。
-data = {'a_description': 'This is the configuration file of ddns script. '
-                         'You can edit this file directly to skip the initialization of the script. '
-                         'There is no need to change last_ip value. '
-                         'More information in https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment'
-                         '/blob/master/Q2/2021214721/',
-        'accessKeyId': '',
-        'accessSecret': '',
-        'domain': '',       # 域名
-        'rr': '',           # 主机记录
-        'record_type': '',  # 解析记录类型
-        'last_ip': '',      # 缓存上次的IP
-        'delay_min': 10     # 执行间隔(单位：分钟)
+data = {'cache_ip': '',  # 缓存上次的IP
+        'domain_record_type': 'A',  # 解析记录类型
+        'host_need_ipv6': False,  # 是否支持ipv6
+        'host_delay_min': 10,  # 执行间隔(单位：分钟),
+        'host_ip_command': 'ifconfig',  # 用户定义的查询IP的命令，此命令可在Windows/Linux上运行其一
+        'host_get_ip_way': 0,  # 获取IP地址的方式，详见get_internet_ip函数
+        'host_index': 0,  # 要使用的网卡或IP的索引
+        'user_accessKeyId': '',
+        'user_accessSecret': '',
+        'user_domain': '',  # 域名
+        'user_rr': '',  # 主机记录
         }
+# 匹配不同类型IP地址的正则表达式
+ipv4_pattern = r'([0,1]?\d{1,2}|2([0-4][0-9]|5[0-5]))(\.([0,1]?\d{1,2}|2([0-4][0-9]|5[0-5]))){3}'
+ipv6_pattern = r'(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:)' \
+               r'{1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,' \
+               r'4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-' \
+               r'9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}' \
+               r')|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:' \
+               r'0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0' \
+               r',1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])' \
+               r'.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))'
 
 
 def init_data() -> None:
     """初始化DDNS配置文件"""
     time.sleep(1)
     print('即将设置DDNS各参数以建立DDNS脚本配置和缓存文件')
-    print('开始初始化DDNS服务配置，请依次输入屏幕提示的内容以设置DDNS(共6项)\n')
+    print('开始初始化DDNS服务配置，请依次输入屏幕提示的内容以设置DDNS'
+          '(根据你的选择，需要设置7~9项参数)\n')
     global data
-    data['accessKeyId'] = input('accessKeyId(可在云服务商控制台获取，建议使用RAM用户以提高安全性):\n')
-    data['accessSecret'] = input('accessSecret(与accessKeyId同时获取):\n')
-    data['domain'] = input('域名(不含子域名，例如 baidu.com ):\n')
-    data['rr'] = input('主机记录(不含域名，例如 www.baidu.com 中的 www ):\n')
-    data['record_type'] = input('解析记录类型(通常解析到IPv4地址为 A):\n')
-    data['delay_min'] = int(input('DDNS脚本执行的间隔时间(单位：分钟，建议设置 10):\n'))
+    data['user_accessKeyId'] = input('accessKeyId(可在云服务商控制台获取，建议使用RAM用户以提高安全性):\n')
+    data['user_accessSecret'] = input('accessSecret(与accessKeyId同时获取):\n')
+    data['user_domain'] = input('域名(不含子域名，例如 baidu.com ):\n')
+    data['user_rr'] = input('主机记录(不含域名，例如 www.baidu.com 中的 www ):\n')
+    # 设置间隔时间
+    delay_min = input('DDNS脚本执行的间隔时间(单位：分钟，默认为10，按回车以应用默认值):\n')
+    if delay_min.strip() == '':
+        data['host_delay_min'] = 10
+    else:
+        data['host_delay_min'] = int(delay_min)
+    # 设置是否使用IPv6
+    while True:
+        need_ipv6 = input('是否使用IPv6(默认为n) (y/n):\n')
+        if need_ipv6.strip() in 'Yy':
+            data['host_need_ipv6'] = True
+            break
+        elif need_ipv6.strip() in 'Nn':
+            data['host_need_ipv6'] = False
+            break
+        else:
+            print('输入错误！\n')
+    # 根据不同情况设置获取IP地址的方式
+    while True:
+        print('本脚本获取IP有以下方式，请选择一种方式(默认为0)：\n\t'
+              '0. 从第三方API获取\n\t'
+              '1. 从本机网卡配置获取\n\t'
+              '2. 通过socket获取\n\t'
+              '3. 通过用户自定义命令来从系统的命令行获取\n')
+        data['host_get_ip_way'] = int(input('请选择IP地址的获取方式:\n(若使用IPv6则只能选择1和3模式)\n'))
+        if data['host_need_ipv6']:
+            if data['host_get_ip_way'] in [1, 3]:
+                break
+            else:
+                print('输入错误！(使用IPv6时只能选择1和3模式)\n')
+        else:
+            if data['host_get_ip_way'] in [0, 1, 2, 3]:
+                break
+            else:
+                print('输入错误！\n')
+    # 根据获取IP的方式确定额外参数
+    if data['host_get_ip_way'] == 1:
+        # 网卡模式，设置指定网卡
+        while True:
+            print('接下来将列出本机的所有网卡及其IP地址，请输入你要使用的网卡的序号(默认为0):\n')
+            net_cards_list = _get_net_cards_list()
+            for net_card in net_cards_list:
+                if data['host_need_ipv6']:
+                    print('\t' + str(net_cards_list.index(net_card)) + ' - ' + net_card['name'] + ' : ' + net_card[
+                        'ipv6'])
+                else:
+                    print('\t' + str(net_cards_list.index(net_card)) + ' : ' + net_card['name'] + ' : ' + net_card[
+                        'ipv4'])
+            index = int(input('\n请选择:\n'))
+            try:
+                a = net_cards_list[index]
+            except IndexError:
+                print('输入错误！\n')
+            else:
+                data['host_index'] = index
+                break
+    elif data['host_get_ip_way'] == 3:
+        # 用户自定义命令模式，设置命令
+        print('你需要为本脚本设置一条能够在本操作系统上输出IP地址的命令，脚本会提取命令的返回值中的有效IP地址。\n'
+              '本脚本预设的默认命令为:\n\tifconfig\n'
+              '支持Linux系统中执行。如需在Windows系统中执行可以设置为\'ipconfig\'\n'
+              '如果要使用默认值，请按回车；要自定义命令，请输入命令。\n')
+        command = input('请输入:\n')
+        if command.strip() == '':
+            data['host_ip_command'] = 'ifconfig'
+        else:
+            data['host_ip_command'] = command
+        # 设置命令后再设置默认使用的IP的索引
+        while True:
+            print('接下来将列出本机的所有IP地址，请输入你要使用的IP地址的序号(默认为0):\n')
+            ip_list = _get_ip_list_by_command()
+            ipv4_list = ip_list['ipv4']
+            ipv6_list = ip_list['ipv6']
+            if data['host_need_ipv6']:
+                for ip in ipv6_list:
+                    print('\t' + str(ipv6_list.index(ip)) + ' - ' + ip)
+            else:
+                for ip in ipv4_list:
+                    print('\t' + str(ipv4_list.index(ip)) + ' - ' + ip)
+            index = int(input('\n请选择:\n'))
+            try:
+                if data['host_need_ipv6']:
+                    a = ipv6_list[index]
+                else:
+                    a = ipv6_list[index]
+            except IndexError:
+                print('输入错误！\n')
+            else:
+                data['host_index'] = index
+                break
+
     save_local_data()
-    print('设置完成')
+    print('\n脚本所需参数设置完成。\n')
+    time.sleep(3)
 
 
 def read_local_data() -> None:
     """读取本地缓存的DDNS信息"""
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         global data
         data = yaml.safe_load(f)
 
 
 def save_local_data() -> None:
     """将DDNS信息缓存在本地"""
-    with open(config_path, 'w') as f:
+    with open(config_path, 'w', encoding='utf-8') as f:
         global data
         yaml.dump(data, f)
+    # 添加配置文件的注释
+    with open(config_path, 'r', encoding='utf-8') as f:
+        str_data = f.read()
+    with open(config_path, 'w', encoding='utf-8') as f:
+        f.write(config_description + str_data)
 
 
-def get_internet_ip(way: 'int 获取IP的方法' = 1) -> 'str 获取到的IP地址':
+def _get_net_cards_list() -> 'list 包含了网卡名称和IP地址的列表':
+    """获取网卡信息"""
+    import psutil
+    import re
+    net_cards_list = []
+    ip_list = []
+    # 对每一个网卡的原始信息进行提取
+    a = psutil.net_if_addrs().items()
+    for k, v in a:
+        for o in v:
+            ip_list.append(o.address)
+        net_cards_list.append({'name': k, 'ips': ip_list[:], 'ipv4': '', 'ipv6': ''})
+        ip_list = []
+    # 对每一个网卡
+    for net_card in net_cards_list:
+        # 对该网卡的每一个ip
+        for ip in net_card['ips']:
+            ipv4_checker = len(re.findall(pattern=ipv4_pattern, string=ip))
+            ipv6_checker = len(re.findall(pattern=ipv6_pattern, string=ip))
+            if ipv4_checker == 1:
+                # 判断为ipv4
+                net_card['ipv4'] = ip
+            elif ipv6_checker == 1:
+                # 判断为ipv6
+                net_card['ipv6'] = ip
+    return net_cards_list
+
+
+def _get_ip_list_by_command() -> 'dict 包含了IPv4和IPv6地址的字典':
+    """执行设定的系统命令并获取IP地址字典"""
+    ipv4_list = []
+    ipv6_list = []
+    import re
+    with os.popen(data['host_ip_command'], 'r') as f:
+        time.sleep(1)
+        os_str_list = f.readlines()
+        for os_str in os_str_list:
+            ipv4_match = re.search(ipv4_pattern, os_str)
+            ipv6_match = re.search(ipv6_pattern, os_str)
+            if ipv4_match is not None:
+                ipv4_list.append(ipv4_match.group())
+            elif ipv6_match is not None:
+                ipv6_list.append(ipv6_match.group())
+    for ip in ipv4_list:
+        if ip.startswith('255.'):
+            # 判断为子网掩码，删除
+            ipv4_list.remove(ip)
+    return {'ipv4': ipv4_list, 'ipv6': ipv6_list}
+
+
+def get_internet_ip(
+        way: 'int 获取IP的方法。0:在线API 1:网卡 2:socket 3:从用户定义的命令中提取。IPv6模式仅支持1和3。' = 0,
+        index: 'int 要使用的索引，仅在网卡模式和自定义命令模式下有效' = 0,
+        need_ipv6: 'bool 是否使用ipv6地址，仅在网卡和自定义命令模式下有效' = False
+) -> 'str 获取到的IP地址':
     """获取本机的IP地址"""
-    with urllib.request.urlopen('http://www.3322.org/dyndns/getip') as response:
-        html = response.read()
-        ip = str(html, encoding='utf-8').replace("\n", "")
+    ip = ''
+
+    if way == 0:
+        # 通过第三方API获取
+        import urllib
+        with urllib.request.urlopen('http://www.3322.org/dyndns/getip') as response:
+            html = response.read()
+            ip = str(html, encoding='utf-8').replace("\n", "")
+
+    elif way == 1:
+        # 通过网卡获取
+        net_cards_list = _get_net_cards_list()
+        ip_dict = net_cards_list[index]
+        if need_ipv6:
+            ip = ip_dict['ipv6']
+        else:
+            ip = ip_dict['ipv4']
+
+    elif way == 2:
+        # 通过socket获取
+        import socket
+        ip = socket.gethostbyname(socket.gethostname())
+
+    elif way == 3:
+        # 通过执行用户定义的命令来提取IP
+        ip_dict = _get_ip_list_by_command()
+        ipv4_list = ip_dict['ipv4']
+        ipv6_list = ip_dict['ipv6']
+        if need_ipv6:
+            ip = ipv6_list[index]
+        else:
+            ip = ipv4_list[index]
     return ip
 
 
@@ -102,43 +295,48 @@ def main(
         read_local_data()
 
         # 检查配置项是否正确
-        if data['accessKeyId'] == "" \
-                or data['accessSecret'] == "" \
-                or data['domain'] == "" \
-                or data['rr'] == "" \
-                or data['record_type'] == "":
+        try:
+            if data['user_accessKeyId'] == '' \
+                    or data['user_accessSecret'] == '' \
+                    or data['user_domain'] == '' \
+                    or data['user_rr'] == '' \
+                    or data['domain_record_type'] == '' \
+                    or data['host_delay_min'] == '' \
+                    or data['host_get_ip_way'] == '' \
+                    or data['host_need_ipv6'] == '':
+                print('配置文件出现错误！')
+                init_data()
+        except Exception:
             print('配置文件出现错误！')
             init_data()
         else:
             break
-
     # 判断IP是否发生变化
-    dns = DnsClient(data['accessKeyId'], data['accessSecret'])
-    ip = get_internet_ip()
-    last_ip = data['last_ip']
+    dns = DnsClient(data['user_accessKeyId'], data['user_accessSecret'])
+    ip = get_internet_ip(data['host_get_ip_way'], data['host_index'], data['host_need_ipv6'])
+    last_ip = data['cache_ip']
     if ip == last_ip:
-        print('IP未发生变化\n\tIP: ' + ip + '\n\t解析地址: ' + data['rr'] + '.' + data['domain'] + '\n')
+        print('IP未发生变化\n\tIP: ' + ip + '\n\t解析地址: ' + data['user_rr'] + '.' + data['user_domain'] + '\n')
     else:
         print('IP发生变化。\n\tOld IP: ' + last_ip + '\tNew IP: ' + ip)
-        data['last_ip'] = ip
+        data['cache_ip'] = ip
         save_local_data()
         print('尝试更新云解析……')
         # 尝试获取主机记录对应的解析记录的Record ID
-        response = dns.describe_domain_record(data['domain'], data['rr'])
-        record_id = ''
+        response = dns.describe_domain_record(data['user_domain'], data['user_rr'])
         try:
             record = response.body.domain_records.record[0]
             record_id = record.record_id
         except IndexError:
             # 主机记录没有对应任何解析记录，即没有创建，无法获取ID
             # 新建解析记录并重新获取Record ID
-            dns.add_domain_record(data['domain'], data['rr'], data['record_type'], ip)
-            print('云解析更新完成！\n\t解析地址: ' + data['rr'] + '.' + data['domain'] + '\n')
+            dns.add_domain_record(data['user_domain'], data['user_rr'], data['domain_record_type'], ip)
+            print('云解析更新完成！\n\t解析地址: ' + data['user_rr'] + '.' + data['user_domain'] + '\n')
         else:
             # 存在主机记录对应的解析记录
             try:
-                dns.update_domain_record(record_id, data['rr'], data['record_type'], ip)
-                print('云解析更新完成！\n\t解析地址: ' + data['rr'] + '.' + data['domain'] + '\n')
+                dns.update_domain_record(record_id, data['user_rr'], data['domain_record_type'], ip)
+                print('云解析更新完成！\n\t解析地址: ' + data['user_rr'] + '.' + data['user_domain'] + '\n')
             except TeaException:
                 # 若本地IP缓存被意外修改，脚本会认为IP已发生变化，从而以同样的解析值再次更新解析记录，导致报错。
                 # 一般忽略即可，下次运行会自动修正。
