@@ -6,6 +6,8 @@ import signal
 import sys
 import getpass
 
+default_super_root_password='123456'
+default_super_root_name='root'
 #mysql -h localhost -u myname -ppassword mydb < xxx.sql(执行.sql文件内的sql语句)
 #分文件编辑指令
 ##主表以id字段作user_id(便于观察)，主表指user-username
@@ -15,8 +17,8 @@ def environment_settle():
     (db,cursor)=database_connecter('super_root')
     try:
         if id_creator('super_root','translate')=='1':
-            cursor.execute('insert into translate (user_name) values(\'root\')')
-            cursor.execute('insert into info (password) values(\'1029384756lxt\')')
+            cursor.execute(f'insert into translate (user_name) values(\'{default_super_root_name}\')')
+            cursor.execute(f'insert into info (password) values(\'{default_super_root_password}\')')
             db.commit()
         default_server_adder('root','server_list')
         default_server_adder('guest','server_list')
