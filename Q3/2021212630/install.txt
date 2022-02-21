@@ -1,14 +1,12 @@
 #!/bin/bash
+path=(pwd)
 case $1 in 
 	1) echo "你选择了安装指定版本"
 #local中保存当前可用版本
-cd /home/observer/桌面/nginx_install
 /usr/local/nginx/sbin/nginx -v &> local
-echo `cat local | grep -o [0-9][0-9].[0-9]` > local
+(cat local | grep -o [0-9][0-9].[0-9]) &> local
 
-insall_web="http://nginx.org/download/nginx-$2.tar.gz"
-path="/home/observer/桌面"
-install_path="/usr/local"
+insall_web="http://nginx.org/download/nginx-${2}.tar.gz"
 echo 安装gcc g++依赖库
 apt-get install build-essential
 apt-get install libtool
@@ -33,48 +31,51 @@ echo -------------------------------------------------------------------------
 echo 安装ssl依赖库..............
 apt-get install openssl
 echo -------------------------------------------------------------------------
-echo 开始安装nginx版本$2
+echo 开始安装nginx版本"${2}"
 
-wget -P $path http://nginx.org/download/nginx-$2.tar.gz
-cd $path
+wget -P "${path}" "${install_web}"
+if [ $? -eq 0 ]
+then
+	echo "下载html成功"
+else
+	echo "下载失败"
+	exit 1
+fi
+
 echo ---------------------------------------------------------------------------
 
 echo 开始解压
-tar zxvf nginx-$2.tar.gz
-cd $path/nginx-$2
+tar zxvf nginx-"${2}".tar.gz
+cd "${path}"/nginx-"${2}" || exit
 ./configure
 make
 make install
 ./back
 	;;
-
-
-
-
-
-
-
-
 	2)echo "你选择了更新至最新版本"
-cd /home/observer/桌面/nginx_install
 #获取本地nginx版本号并存储至b.txt
 /usr/local/nginx/sbin/nginx -v &> b.txt
 #local中保存当前版本信息
-echo `cat b.txt | grep -o [0-9][0-9].[0-9]` > local
-echo `cat b.txt | grep -o [0-9][0-9].[0-9]` > b.txt
+(cat b.txt | grep -o [0-9][0-9].[0-9]) &> local
+(cat b.txt | grep -o [0-9][0-9].[0-9]) &> b.txt
 #获取官网html
 wget https://nginx.org/en/download.html
-cat download.html | grep -o nginx-1.[0-9]..[0-9] > a.txt
-echo `sed -n '1p' a.txt` > a.txt
-echo `cat a.txt | grep -o [0-9][0-9].[0-9]` > a.txt
+if [ $? -eq 0 ]
+then 
+echo "下载html成功"
+else
+echo "下载失败"
+exit 1
+fi
+(cat download.html | grep -o nginx-1.[0-9]..[0-9]) &> a.txt
+sed -n '1p' a.txt &> a.txt
+(cat a.txt | grep -o [0-9][0-9].[0-9]) &> a.txt
 #a.txt中保存官网最新版本
-a=`cat a.txt`
-b=`cat b.txt`
-if [ `expr $a \> $b` -eq 1 ]
+a=(cat a.txt)
+b=(cat b.txt)
+if [ "$(expr "${a}" \> "${b}")" -eq 1 ]
 then
-insall_web="http://nginx.org/download/nginx-1.$a.tar.gz"
-path="/home/observer/桌面"
-install_path="/usr/local"
+insall_web="http://nginx.org/download/nginx-1.${a}.tar.gz"
 echo 安装gcc g++依赖库
 apt-get install build-essential
 apt-get install libtool
@@ -92,31 +93,34 @@ apt-get install libpcre3 libpcre3-dev
 
 echo 安装ssl依赖库..............
 apt-get install openssl
-echo  -------------------------------------------------------------------------
-echo 开始安装nginx版本$a
+echo -------------------------------------------------------------------------
+echo 开始安装nginx版本"${a}"
 
-wget -P $path http://nginx.org/download/nginx-1.$a.tar.gz
-cd $path
+wget -P "${path}" "${install_web}"
+if [ $? -eq 0 ]
+then
+	echo "下载html成功"
+else
+	echo "下载失败"
+	exit 1
+fi
+
 echo ---------------------------------------------------------------------------
 
 echo 开始解压
-tar zxvf nginx-1.$a.tar.gz
-cd $path/nginx-1.$a
+tar zxvf nginx-1."${a}".tar.gz
+cd "${path}"/nginx-1."${a}" || exit
 ./configure
 make
-make install
-cd /home/observer/桌面/nginx_install
+make install 
+cd "${path}" || exit
 rm download.html
-cd $path
-rm nginx-1.$a.tar.gz
-rm -r nginx-1.$a
-cd /home/observer/桌面/nginx_install
+rm nginx-1."${a}".tar.gz
 ./back
 
 
 else
 echo "当前版本已经是最新版本"
-cd /home/observer/桌面/nginx_install
 rm download.html
 fi
 
@@ -124,6 +128,10 @@ fi
 	*)echo "请在参数1号位输入正确的数字（1或2）"
 	;;
 esac	
+
+
+
+
 
 
 
