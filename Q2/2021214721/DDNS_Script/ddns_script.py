@@ -11,8 +11,8 @@ Author: zhangxinhui02
 访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721/ 查看完整项目。
 """
 
-# todo: 1.自动更新 2.部署安装脚本（包括各种依赖库） 3.多种获取IP的方法done 4.IPv6
-#  5.不用SDK自己实现 6.参数调用 7.加密 8.网卡修改后可能会不匹配
+# todo: 1.自动更新 2.部署安装脚本（包括各种依赖库） 3.多种获取IP的方法done 4.IPv6 还有些bug
+#  5.不用SDK自己实现 6.参数调用 7.加密 8.网卡修改后可能会不匹配 9.代码重构 10.自动判断系统并修改命令 11.可配置ttl等
 import os
 import sys
 import time
@@ -35,7 +35,7 @@ data = {'cache_ip': '',  # 缓存上次的IP
         'domain_record_type': 'A',  # 解析记录类型
         'host_need_ipv6': False,  # 是否支持ipv6
         'host_delay_min': 10,  # 执行间隔(单位：分钟),
-        'host_ip_command': 'ifconfig',  # 用户定义的查询IP的命令，此命令可在Windows/Linux上运行其一
+        'host_ip_command': 'ifconfig',  # 用户定义的查询IP的命令
         'host_get_ip_way': 0,  # 获取IP地址的方式，详见get_internet_ip函数
         'host_index': 0,  # 要使用的网卡或IP的索引
         'user_accessKeyId': '',
@@ -45,14 +45,19 @@ data = {'cache_ip': '',  # 缓存上次的IP
         }
 # 匹配不同类型IP地址的正则表达式
 ipv4_pattern = r'([0,1]?\d{1,2}|2([0-4][0-9]|5[0-5]))(\.([0,1]?\d{1,2}|2([0-4][0-9]|5[0-5]))){3}'
-ipv6_pattern = r'(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:)' \
-               r'{1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,' \
-               r'4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-' \
-               r'9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6}' \
-               r')|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:' \
-               r'0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0' \
-               r',1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])' \
-               r'.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))'
+ipv6_pattern = "^\\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1," \
+               "4}|((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:)" \
+               ")|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\" \
+               "d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f" \
+               "]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0" \
+               "-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:" \
+               "[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\" \
+               "d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1" \
+               ",4}){0,3}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d))" \
+               "{3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((2" \
+               "5[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(:(" \
+               "((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d" \
+               ")(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:)))(%.+)?\\s*$"
 
 
 def init_data() -> None:
@@ -77,9 +82,11 @@ def init_data() -> None:
         need_ipv6 = input('是否使用IPv6(默认为n) (y/n):\n')
         if need_ipv6.strip() in 'Yy':
             data['host_need_ipv6'] = True
+            data['domain_record_type'] = 'AAAA'
             break
         elif need_ipv6.strip() in 'Nn':
             data['host_need_ipv6'] = False
+            data['domain_record_type'] = 'A'
             break
         else:
             print('输入错误！\n')
@@ -135,7 +142,7 @@ def init_data() -> None:
             data['host_ip_command'] = command
         # 设置命令后再设置默认使用的IP的索引
         while True:
-            print('接下来将列出本机的所有IP地址，请输入你要使用的IP地址的序号(默认为0):\n')
+            print('接下来将列出从命令行提取的本机的所有IP地址，请输入你要使用的IP地址的序号(默认为0):\n')
             ip_list = _get_ip_list_by_command()
             ipv4_list = ip_list['ipv4']
             ipv6_list = ip_list['ipv6']
@@ -219,13 +226,17 @@ def _get_ip_list_by_command() -> 'dict 包含了IPv4和IPv6地址的字典':
         os_str_list = f.readlines()
         for os_str in os_str_list:
             ipv4_match = re.search(ipv4_pattern, os_str)
-            ipv6_match = re.search(ipv6_pattern, os_str)
             if ipv4_match is not None:
-                ipv4_list.append(ipv4_match.group())
-            elif ipv6_match is not None:
-                ipv6_list.append(ipv6_match.group())
+                ipv4_list.append(ipv4_match.group().strip())
+            else:
+                # IPv6较难匹配，需要剔除其他干扰字符
+                for s in os_str.split(' '):
+                    ipv6_match = re.search(ipv6_pattern, s)
+                    if ipv6_match is not None:
+                        ipv6_str = ipv6_match.group().strip()
+                        ipv6_list.append(ipv6_str.split('%')[0])
     for ip in ipv4_list:
-        if ip.startswith('255.'):
+        if str(ip).startswith('255.'):
             # 判断为子网掩码，删除
             ipv4_list.remove(ip)
     return {'ipv4': ipv4_list, 'ipv6': ipv6_list}
