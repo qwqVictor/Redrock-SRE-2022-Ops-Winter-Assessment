@@ -1,12 +1,12 @@
 #!/bin/bash
+path=(pwd)
 nginx -t &> d.txt
-a=`cat local`
-b=`cat d.txt | grep -o ok`
+a=(cat local)
+b=(cat d.txt | grep -o ok)
 if [ $b != "ok" ]
 then
-insall_web="http://nginx.org/download/nginx-1.$a.tar.gz"
+insall_web="http://nginx.org/download/nginx-1."$a".tar.gz"
 path="/home/observer/桌面"
-install_path="/usr/local"
 echo 安装gcc g++依赖库
 apt-get install build-essential
 apt-get install libtool
@@ -22,18 +22,26 @@ apt-get install libpcre3 libpcre3-dev
 echo 安装ssl依赖库..............
 apt-get install openssl
 echo -------------------------------------------------------------------------
-echo 开始安装nginx版本$a
+echo 开始安装nginx版本"$a"
 
-wget -P $path http://nginx.org/download/nginx-1.$a.tar.gz
-cd $path
+wget -P "$path $install_web"
+if [ $? -eq 0 ]
+then
+	echo "下载html成功"
+else
+	echo "下载失败"
+	exit 1
+fi
+cd "$path"
 echo ---------------------------------------------------------------------------
 
 echo 开始解压
-tar zxvf nginx-1.$a.tar.gz
-cd $path/nginx-1.$a
+tar zxvf nginx-1."$a".tar.gz
+cd "$path"/nginx-1."$a" || exit
 ./configure
 make
 make install
 else
 echo "当前版本运行正常"
+
 fi
