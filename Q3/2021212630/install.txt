@@ -119,6 +119,7 @@ make
 make install 
 cd "$path" || exit
 rm download.html
+rm -r nginx-1."$a"
 rm nginx-1."$a".tar.gz
 ./back
 
