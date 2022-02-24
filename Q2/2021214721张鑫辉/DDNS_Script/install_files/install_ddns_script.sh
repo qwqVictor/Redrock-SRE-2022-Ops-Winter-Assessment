@@ -16,6 +16,7 @@ wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw
 wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns
 wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py
 wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/aliyun_dns_manager.py
+chmod +x ddns
 pip3 install -r requirements.txt || pip install -r requirements.txt
 
 cd $SERVICE_PATH || exit

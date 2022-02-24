@@ -5,7 +5,7 @@ Author: zhangxinhui02
 
 ## DDNS
 
-由于ISP分配给用户设备的IP地址并不固定，为了将设备当前的设备IP及时映射到域名上，使用户在任何时候都可以通过固定的地址访问到设备，产生了动态域名解析DDNS技术。
+由于ISP分配给用户设备的IP地址并不固定，为了将设备当前的IP及时映射到域名上，使用户在任何时候都可以通过固定的地址访问到设备，产生了动态域名解析DDNS技术。
 
 ------
 
@@ -23,17 +23,19 @@ Author: zhangxinhui02
 
 ## 安装
 
-请保证操作系统中安装了python3环境。
+请保证操作系统中安装了python3环境和pip3工具。
 
 运行以下命令即可安装。
 
 ```shell
-sudo su -c "bash <(wget -qO- https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/install_ddns_script.sh)" root
+wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/install_ddns_script.sh
+sudo chmod +x install_ddns_script.sh
+sudo ./install_ddns_script.sh
 ```
 
-脚本将被安装在`/usr/local/ddns_script`路径下，配置文件将会在生成在`/etc/ddns_config.yaml`。此外将通过Systemd创建定时任务，每10分钟执行一次DDNS。
+脚本将被安装在`/usr/local/ddns_script`路径下，配置文件将会生成在`/etc/ddns_config.yaml`。此外将通过Systemd创建定时任务，每10分钟执行一次DDNS。
 
-脚本依赖包括以下的Python模块，将会自动安装。[查看全部](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/requirements.txt)
+脚本依赖包括以下的Python模块，将会自动安装。[查看全部](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/requirements.txt)
 
 - 阿里云SDK
 - PyYAML
@@ -85,15 +87,15 @@ sudo su -c "bash <(wget -qO- https://github.com/zhangxinhui02/Redrock-SRE-2022-O
 
 ### level0
 
-获取IP并更新解析记录详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)，设置定时器详见[install_ddns_script.sh](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/install_ddns_script.sh)。
+获取IP并更新解析记录详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)，设置定时器详见[install_ddns_script.sh](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/install_ddns_script.sh)。
 
 ### level1
 
-多种方式获取IP地址详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
+多种方式获取IP地址详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
 
 ### level2
 
-支持IPv6详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
+支持IPv6详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
 
 ### level3
 
