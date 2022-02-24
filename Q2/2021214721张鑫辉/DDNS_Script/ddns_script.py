@@ -146,7 +146,7 @@ def init_data() -> None:
                 if data['host_need_ipv6']:
                     a = ipv6_list[index]
                 else:
-                    a = ipv6_list[index]
+                    a = ipv4_list[index]
             except IndexError:
                 print('输入错误！\n')
             else:
