@@ -5,7 +5,7 @@
 Author: zhangxinhui02
 
 引入此模块以简单管理域名解析
-访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721/ 查看完整项目。
+访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/ 查看完整项目。
 """
 
 from alibabacloud_alidns20150109.client import Client as Alidns20150109Client

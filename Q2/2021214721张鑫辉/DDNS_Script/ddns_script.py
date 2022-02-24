@@ -7,26 +7,23 @@ Author: zhangxinhui02
 
 管理本机的DDNS服务运行。
 
-安装本脚本后键入'ddns'命令以运行脚本，键入'ddns -h'命令以查看帮助。
-访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721/ 查看完整项目。
+安装本脚本后键入'ddns'命令以运行脚本，键入'ddns help'命令以查看帮助。
+访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/ 查看完整项目。
 """
 
-# todo: 1.自动更新 2.部署安装脚本（包括各种依赖库） 3.多种获取IP的方法done 4.IPv6 还有些bug
-#  5.不用SDK自己实现 6.参数调用 7.加密 8.网卡修改后可能会不匹配 9.代码重构 10.自动判断系统并修改命令 11.可配置ttl等
 import os
 import sys
 import time
 import yaml
-from typing import List
 from Tea.exceptions import TeaException
 from aliyun_dns_manager import DnsClient
 
 # DDNS脚本配置文件的默认路径，可以进行修改。
-config_path = './config.yaml'
+config_path = '/etc/ddns_config.yaml'
 # DDNS脚本配置文件的说明信息
 config_description = '# 这是DDNS脚本的配置文件。手动配置此文件可以跳过脚本的初始化。\n' \
                      '# 访问 https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/' \
-                     '2021214721/ 以查看项目。\n\n' \
+                     '2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/ 以查看项目。\n\n' \
                      '# 以cache开头的值无需配置。\n' \
                      '# 以user开头的值必需配置。\n' \
                      '# 其他值可以保持默认。\n\n'
@@ -34,7 +31,6 @@ config_description = '# 这是DDNS脚本的配置文件。手动配置此文件�
 data = {'cache_ip': '',  # 缓存上次的IP
         'domain_record_type': 'A',  # 解析记录类型
         'host_need_ipv6': False,  # 是否支持ipv6
-        'host_delay_min': 10,  # 执行间隔(单位：分钟),
         'host_ip_command': 'ifconfig',  # 用户定义的查询IP的命令
         'host_get_ip_way': 0,  # 获取IP地址的方式，详见get_internet_ip函数
         'host_index': 0,  # 要使用的网卡或IP的索引
@@ -65,18 +61,12 @@ def init_data() -> None:
     time.sleep(1)
     print('即将设置DDNS各参数以建立DDNS脚本配置和缓存文件')
     print('开始初始化DDNS服务配置，请依次输入屏幕提示的内容以设置DDNS'
-          '(根据你的选择，需要设置7~9项参数)\n')
+          '(根据你的选择，需要设置6~8项参数)\n')
     global data
     data['user_accessKeyId'] = input('accessKeyId(可在云服务商控制台获取，建议使用RAM用户以提高安全性):\n')
     data['user_accessSecret'] = input('accessSecret(与accessKeyId同时获取):\n')
     data['user_domain'] = input('域名(不含子域名，例如 baidu.com ):\n')
     data['user_rr'] = input('主机记录(不含域名，例如 www.baidu.com 中的 www ):\n')
-    # 设置间隔时间
-    delay_min = input('DDNS脚本执行的间隔时间(单位：分钟，默认为10，按回车以应用默认值):\n')
-    if delay_min.strip() == '':
-        data['host_delay_min'] = 10
-    else:
-        data['host_delay_min'] = int(delay_min)
     # 设置是否使用IPv6
     while True:
         need_ipv6 = input('是否使用IPv6(默认为n) (y/n):\n')
@@ -283,9 +273,7 @@ def get_internet_ip(
     return ip
 
 
-def main(
-        args: List[str],
-) -> None:
+def main() -> None:
     # 测试配置文件是否存在及读写权限
     while True:
         try:
@@ -312,7 +300,6 @@ def main(
                     or data['user_domain'] == '' \
                     or data['user_rr'] == '' \
                     or data['domain_record_type'] == '' \
-                    or data['host_delay_min'] == '' \
                     or data['host_get_ip_way'] == '' \
                     or data['host_need_ipv6'] == '':
                 print('配置文件出现错误！')
@@ -352,7 +339,3 @@ def main(
                 # 若本地IP缓存被意外修改，脚本会认为IP已发生变化，从而以同样的解析值再次更新解析记录，导致报错。
                 # 一般忽略即可，下次运行会自动修正。
                 print('本地IP缓存出现错误，本次未修改云解析记录。')
-
-
-if __name__ == '__main__':
-    main(sys.argv[1:])

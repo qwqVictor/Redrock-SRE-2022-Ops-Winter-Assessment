@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs DDNS every 10mins
+[Timer]
+# 首次运行在启动后1分钟
+OnBootSec=1min
+# 每次运行间隔10min
+OnUnitActiveSec=10min
+Unit=ddns.service
+[Install]
+WantedBy=multi-user.target
