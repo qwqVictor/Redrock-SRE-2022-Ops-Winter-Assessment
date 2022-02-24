@@ -5,6 +5,7 @@
 
 # 安装路径
 INSTALL_PATH="/usr/local/ddns_script"
+BIN_PATH="/usr/local/bin"
 SERVICE_PATH="/etc/systemd/system/"
 
 if [ ! -d $INSTALL_PATH ]
@@ -13,11 +14,14 @@ fi
 
 cd $INSTALL_PATH || exit
 wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/requirements.txt
-wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns
+wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns.py
 wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py
 wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/aliyun_dns_manager.py
-chmod +x ddns
 pip3 install -r requirements.txt || pip install -r requirements.txt
+
+cd $BIN_PATH || exit
+wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/ddns
+chmod +x ddns
 
 cd $SERVICE_PATH || exit
 wget https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/raw/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/install_files/ddns.service

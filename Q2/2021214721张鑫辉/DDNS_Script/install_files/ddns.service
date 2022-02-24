@@ -2,4 +2,4 @@
 Description=DDNS Service
 [Service]
 Type=simple
-ExecStart=/usr/local/ddns_script/ddns
+ExecStart=/usr/local/bin/ddns
