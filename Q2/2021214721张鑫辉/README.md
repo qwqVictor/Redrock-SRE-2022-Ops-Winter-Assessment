@@ -83,7 +83,7 @@ sudo ./install_ddns_script.sh
 
 ## 考核
 
-考核完成至level2。
+考核完成至level3。level1未完成。
 
 ### level0
 
@@ -91,12 +91,16 @@ sudo ./install_ddns_script.sh
 
 ### level1
 
-多种方式获取IP地址详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
+因为是之前Fork的，所以没看见后面加的题。
 
 ### level2
 
-支持IPv6详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
+多种方式获取IP地址详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
 
 ### level3
+
+支持IPv6详见[ddns_script.py](https://github.com/zhangxinhui02/Redrock-SRE-2022-Ops-Winter-Assessment/blob/master/Q2/2021214721%E5%BC%A0%E9%91%AB%E8%BE%89/DDNS_Script/ddns_script.py)。
+
+### level4
 
 待完成。
