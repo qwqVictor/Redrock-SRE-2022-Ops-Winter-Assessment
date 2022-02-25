@@ -1,0 +1,53 @@
+#!/usr/ bin/bash 
+   
+#Author:Li Yuanfan
+#Script Description:nginx install and upgrade
+   
+   #定义版本与目录变量
+   nginx_version="nginx-1.21.6.tar.gz"
+   nginx_files='echo "$nginx_version"|cut -d "." -f1-3'
+   nginx_installfiles="/usr/local/nginx"
+   #下载依赖包
+  
+   if ! (apt-get -f install 1>/dev/null);
+   then
+       echo "缺少依赖包"
+       exit 1
+   fi
+   #下载并解压源码包,同样除去多余命令
+   install()
+   {
+      if wget http://nginx.org/download/$nginx_version 1>/dev/null;
+      then
+          tar xf $nginx_version
+          if [ ! -d $nginx_files ];
+          then
+              echo "未获取源码包"
+              exit 1
+          fi
+      else
+          echo "源码包下载失败"
+          exit 1
+      fi
+   #编译安装到指定文件夹下 
+   cd $nginx_installfiles || exit
+   if ./configure --prefix="$nginx_files" 1>/dev/null;
+   then
+       if make;
+       then
+           if make install;
+           then
+              echo"安装成功"
+          else
+              echo"失败";
+              exit 1
+           fi
+       else
+          echo"失败";
+          exit 1
+       fi
+   else
+      echo"失败";
+      exit 1
+   fi
+  }
