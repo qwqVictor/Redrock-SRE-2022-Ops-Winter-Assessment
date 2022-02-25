@@ -1,0 +1,13 @@
+version: '2'
+services:
+ ddns:
+  build: .
+networks:
+ my-network:
+  enable_ipv6: true
+  driver: bridge
+  ipam:
+   driver: default
+   config:
+   - subnet: 2409:8930:5835:e47:7445:1af4:2df0:1/64
+   - subnet: 2409:8930:5835:e47:7445:1af4:2df0:1/64
