@@ -1,0 +1,5 @@
+[Unit]
+Description=DDNS Service
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ddns
