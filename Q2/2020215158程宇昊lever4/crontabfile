@@ -1,0 +1,6 @@
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+HOME=/
+* * * * *       root	/usr/locl/DDNSshell/DDNSformal.sh >> /var/log/cron.log 2>&1
+* * * * *	root	echo "DDNS is running" >> /var/log/cron.log 
